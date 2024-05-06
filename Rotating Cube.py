@@ -1,6 +1,6 @@
 from vpython import *
 scene = canvas()
-N = 10
+N = 5
 
 scene.title = f"{N} by {N} by {N} = {N * N * N} rotating cubes\n "
 scene.caption = "Click a box to turn it white"
