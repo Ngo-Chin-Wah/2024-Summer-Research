@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 from vpython import *
-scene = canvas(width=1500, height=400, background = color.white)
+scene = canvas(width = 1500, height = 400, background = color.white)
 
 # Define the function representing the ODE, assuming F(t) and noise term are 0
 def moving_mirror(x, t, r, omega):
