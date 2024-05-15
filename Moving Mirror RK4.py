@@ -52,6 +52,7 @@ def explicit_RK4(f, t0, tf, y0, r, omega, h):
     for i in range(num_steps):
         t = t_values[i]
         x = x_values[i]
+        print(x)
 
         k1 = h * f(t, x, r, omega)
         k2 = h * f(t + 0.5 * h, x + 0.5 * k1, r, omega)
@@ -85,9 +86,11 @@ def update_mirror(mirror, sol):
 # Create the mirror object
 mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
 
+fps = int(1 / h)
+
 # Plot the solution
-plt.plot(t_values[:1000], sol[:1000, 0], label='Position')
-plt.plot(t_values[:1000], sol[:1000, 1], label='Velocity')
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 0], label='Position')
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 1], label='Velocity')
 plt.xlabel('Time')
 plt.ylabel('Position')
 plt.title('Position and Velocity against Time')
@@ -98,5 +101,5 @@ plt.savefig('moving_mirror_rk4.png')  # Save the plot to an image file
 # Animate the motion of the mirror
 for i in range(len(t_values)):
     #scene.autoscale = False
-    rate(100)  # Limit the frame rate to 100 frames per second
+    rate(fps)  # Limit the frame rate to 100 frames per second
     update_mirror(mirror, sol[:i + 1])
