@@ -2,7 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from vpython import *
 
-scene = canvas(width=1500, height=400, background=color.white)
+scene = canvas(width = 1500, height = 400, background = color.white)
+
+def F(t):
+    return F0 * np.cos(omega_f * t) 
 
 def f(t, S):
     """
@@ -17,7 +20,7 @@ def f(t, S):
     """
     dSdt = np.zeros_like(S)
     dSdt[0] = S[1]
-    dSdt[1] = -2 * r * S[1] - omega ** 2 * S[0]
+    dSdt[1] = - F(t) / m - 2 * r * S[1] - omega ** 2 * S[0]
     return dSdt
 
 def RK45(f, t0, tf, S0, h):
@@ -80,7 +83,7 @@ def update_mirror(mirror, sol):
     """
     mirror.pos = vector(sol[:, 0][-1], 0, 0)
 
-global r, omega, error_m
+global r, omega, error_m, omega_f, F0
 
 m = float(input("Mass of the mirror:"))
 k = float(input("Spring constant:"))
@@ -94,6 +97,8 @@ tf = 10.0
 h = 0.0001
 S0 = np.array([x0, v0])
 error_m = 1e-5
+F0 = 3
+omega_f = sqrt(6) #The resonance frequency is sqrt(k / m)
 
 mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
 
@@ -106,7 +111,7 @@ plt.ylabel('Position')
 plt.title('Position and Velocity against Time')
 plt.legend()
 plt.grid(True)
-plt.savefig('moving_mirror_rk45.png')
+plt.savefig('moving_mirror_with_force_rk45.png')
 
 while True:
     for i in range(len(t_values)):
