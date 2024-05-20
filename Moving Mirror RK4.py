@@ -72,8 +72,8 @@ omega = (k / m) ** 0.5
 x0 = float(input("Initial position:"))
 v0 = float(input("Initial velocity:"))
 t0 = 0.0  
-tf = 100.0 
-h = 0.01 
+tf = 10.0 
+h = 0.0001 
 S0 = np.array([x0, v0])
 
 # Solve the differential equation using RK4
