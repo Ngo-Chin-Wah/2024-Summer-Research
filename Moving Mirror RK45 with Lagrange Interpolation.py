@@ -87,6 +87,32 @@ def update_mirror(mirror, sol):
     """
     mirror.pos = vector(sol[:, 0][-1], 0, 0)
 
+def lagrange_interpolation(t_values, x_values, t):
+    """
+    Perform Lagrange interpolation for the given set of data points.
+
+    Parameters:
+    x_points (list of float): The x-coordinates of the data points.
+    y_points (list of float): The y-coordinates of the data points.
+    x (float): The x-value at which to evaluate the interpolated polynomial.
+
+    Returns:
+    float: The interpolated value at x.
+    """
+    assert len(t_values) == len(x_values), "x_points and y_points must have the same length"
+    
+    n = len(t_values)
+    interpolated_value = 0.0
+    
+    for i in range(n):
+        term = x_values[i]
+        for j in range(n):
+            if i != j:
+                term *= (t - t_values[j]) / (t_values[i] - t_values[j])
+        interpolated_value += term
+    
+    return interpolated_value
+
 global r, omega, error_m, omega_f, F0
 
 m = float(input("Mass of the mirror:"))
@@ -107,6 +133,13 @@ omega_f = sqrt(6) #The resonance frequency is sqrt(k / m)
 mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
 
 t_values, x_values = RK45(f, t0, tf, S0, h)
+
+t_values_interpolated = np.linspace(t0, tf, int((tf - t0) / h))
+x_values_interpolated = np.zeros_like(t_values_interpolated)
+
+for t in t_values_interpolated:
+    x_interpolated = lagrange_interpolation(t_values, x_values, t)
+    
 
 plt.plot(t_values, x_values[:, 0], label = 'Position')
 plt.plot(t_values, x_values[:, 1], label = 'Velocity')
