@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from vpython import *
-scene = canvas(width = 1500, height = 400, background = color.white)
+# scene = canvas(width = 1500, height = 400, background = color.white)
 
 def f(t, S, r, omega):
     """
@@ -22,7 +22,7 @@ def f(t, S, r, omega):
     """
     dSdt = np.zeros_like(S)
     dSdt[0] = S[1]  # x' = y[1]
-    dSdt[1] = -2 * r * S[1] - omega ** 2 * S[0]
+    dSdt[1] = -2 * r * S[1] - (omega ** 2) * S[0]
     return dSdt
 
 def explicit_RK4(f, t0, tf, y0, r, omega, h):
@@ -52,7 +52,6 @@ def explicit_RK4(f, t0, tf, y0, r, omega, h):
     for i in range(num_steps):
         t = t_values[i]
         x = x_values[i]
-        print(x)
 
         k1 = h * f(t, x, r, omega)
         k2 = h * f(t + 0.5 * h, x + 0.5 * k1, r, omega)
@@ -72,8 +71,8 @@ omega = (k / m) ** 0.5
 x0 = float(input("Initial position:"))
 v0 = float(input("Initial velocity:"))
 t0 = 0.0  
-tf = 10.0 
-h = 0.0001 
+tf = 5.0
+h = 0.00001 
 S0 = np.array([x0, v0])
 
 # Solve the differential equation using RK4
@@ -84,13 +83,26 @@ def update_mirror(mirror, sol):
     mirror.pos = vector(sol[:, 0][-1], 0, 0)
 
 # Create the mirror object
-mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
+# mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
 
 fps = int(1 / h)
 
+# Apply FFT
+n = len(t_values)  # Number of samples
+fhat = np.fft.fft(sol[:, 0], n)  # Compute the FFT
+psd = fhat * np.conj(fhat) / n  # Power spectral density
+freq = (1 / (0.00001 * n)) * np.arange(n)  # Frequency array
+L = np.arange(1, np.floor(n / 2), dtype = 'int')  # Only use the first half of the FFT output
+
+# Find the peak in the frequency domain
+peak_idx = np.argmax(psd[L])  # Index of the peak
+peak_freq = freq[L][peak_idx]  # Frequency of the peak
+peak_power = psd[L][peak_idx]  # Power at the peak
+print("Peak frequency:", peak_freq)
+
 # Plot the solution
-plt.plot(t_values[:10 * fps], sol[:10 * fps, 0], label='Position')
-plt.plot(t_values[:10 * fps], sol[:10 * fps, 1], label='Velocity')
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 0], label = 'Position')
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 1], label = 'Velocity')
 plt.xlabel('Time')
 plt.ylabel('Position')
 plt.title('Position and Velocity against Time')
@@ -99,7 +111,7 @@ plt.grid(True)
 plt.savefig('moving_mirror_rk4.png')  # Save the plot to an image file
 
 # Animate the motion of the mirror
-for i in range(len(t_values)):
-    #scene.autoscale = False
-    rate(fps)  # Limit the frame rate to 100 frames per second
-    update_mirror(mirror, sol[:i + 1])
+# for i in range(len(t_values)):
+    # scene.autoscale = False
+    # rate(fps)  # Limit the frame rate to 100 frames per second
+    # update_mirror(mirror, sol[:i + 1])

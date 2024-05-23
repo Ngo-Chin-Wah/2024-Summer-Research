@@ -29,7 +29,7 @@ def f(t, S):
     """
     dSdt = np.zeros_like(S)  # Initialize derivative vector
     dSdt[0] = S[1]  # Derivative of position is velocity
-    dSdt[1] = - F(t) / m - 2 * r * S[1] - omega ** 2 * S[0]  # Derivative of velocity (Newton's second law)
+    dSdt[1] = - F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0]  # Derivative of velocity (Newton's second law)
     return dSdt  # Return the derivatives
 
 def RK45(f, t0, tf, S0, h):
@@ -204,6 +204,7 @@ L = np.arange(1, np.floor(n / 2), dtype = 'int')  # Only use the first half of t
 peak_idx = np.argmax(psd[L])  # Index of the peak
 peak_freq = freq[L][peak_idx]  # Frequency of the peak
 peak_power = psd[L][peak_idx]  # Power at the peak
+print("Peak frequency:", peak_freq)
 
 # Plotting the results
 plt.figure(figsize = (10, 8))  # Create a figure
@@ -226,7 +227,6 @@ plt.grid(True)  # Show grid
 
 plt.subplot(5, 1, 5)  # Create a subplot for the FFT
 plt.plot(freq[L], psd[L])  # Plot the power spectrum
-plt.text(peak_freq, peak_power, f'({peak_freq:.01f}, {peak_power:.01f})', color = 'black', ha = "right")  # Annotate the peak
 plt.xlabel('Frequency (Hz)')  # X-axis label
 plt.ylabel('Power')  # Y-axis label
 plt.title('Frequency Domain Signal')  # Plot title
