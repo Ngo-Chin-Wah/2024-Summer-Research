@@ -67,7 +67,7 @@ def RK45(f, t0, tf, S0, h):
         s = 0.84 * (error_m / error) ** (1 / 4)  # Calculate scaling factor
         print("Out loop", n, "h:", h)  # Print debug information
 
-        while (error > error_m):  # Error control loop
+        while (error > error_m) or (error / error_m < 0.3):  # Error control loop
             h = s * h  # Adjust step size
             k1 = h * f(t, x)  # Recalculate k1
             k2 = h * f(t + (1 / 4) * h, x + (1 / 4) * k1)  # Recalculate k2
@@ -78,8 +78,8 @@ def RK45(f, t0, tf, S0, h):
             x_new = x + (25 / 216) * k1 + (1408 / 2565) * k3 + (2197 / 4101) * k4 - (1 / 5) * k5  # Update state vector
             z_new = x + (16 / 135) * k1 + (6656 / 12825) * k3 + (28561 / 56430) * k4 - (9 / 50) * k5 + (2 / 55) * k6  # Calculate z_new for error estimation
             error = abs(z_new[0] - x_new[0])  # Calculate error
-            s = 0.84 * (error_m / error) ** (1 / 4)  # Calculate scaling factor
-            print("In loop, h:", h)  # Print debug information
+            s = (error_m / error) ** (1 / 5)  # Calculate scaling factor
+            print("In loop", n, "h:", h)  # Print debug information
 
         x_values = np.concatenate((x_values, [x_new]), axis = 0)  # Append new state to the array
         t_values = np.append(t_values, t + h)  # Append new time to the array
@@ -123,7 +123,7 @@ def cubic_spline_coefficients(t_values, x_values):
         A[i, i] = 2 * (h[i - 1] + h[i])  # Main diagonal
         A[i, i + 1] = h[i]  # Upper diagonal
         rhs[i] = 3 * (b[i] - b[i - 1])  # Right-hand side
-        print("Cubic splining", i)  # Print debug information
+        # print("Cubic splining", i)  # Print debug information
     
     # Solve the system for c
     c = np.linalg.solve(A, rhs)  # Solve the tridiagonal system
@@ -175,10 +175,10 @@ omega = (k / m) ** 0.5  # Natural frequency
 x0 = float(input("Initial position:"))  # Initial position
 v0 = float(input("Initial velocity:"))  # Initial velocity
 t0 = 0.0  # Start time
-tf = 40.0  # End time
+tf = 10.0  # End time
 h = 0.1  # Initial step size
 S0 = np.array([x0, v0])  # Initial state vector
-error_m = 1e-5  # Tolerance for error
+error_m = 1e-6  # Tolerance for error
 F0 = 0  # Driving force amplitude
 omega_f = np.sqrt(6)  # Driving frequency
 
