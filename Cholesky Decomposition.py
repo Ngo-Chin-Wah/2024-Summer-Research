@@ -6,7 +6,7 @@ m = 0.1 * 10 ** (-6)
 b = 0.2 * 10 ** (-6)
 t0 = 0.0 
 tf = 10.0
-h = 0.001
+h = 0.01
 
 def noise():
     time_matrix = h * np.abs(np.arange((tf - t0) / h)[:, None] - np.arange((tf - t0) / h)[None, :])
@@ -30,7 +30,7 @@ plt.xlabel('Time')
 plt.ylabel('Noise')
 plt.title('Noise against Time')
 plt.grid(True)
-plt.savefig('noise.png') 
+plt.savefig('cholesky_decomposition.png') 
 
 mean = np.mean(noise)
 variance = np.var(noise)
