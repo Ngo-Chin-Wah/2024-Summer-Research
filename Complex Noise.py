@@ -9,15 +9,15 @@ h = 0.01
 
 def noise(m, b, t0, tf, h):
     time_matrix = h * np.abs(np.arange((tf - t0) / h)[:, None] - np.arange((tf - t0) / h)[None, :])
-    covariance_matrix = np.zeros_like(time_matrix)
+    correlation_matrix = np.zeros_like(time_matrix)
 
     for i in range(len(time_matrix)):
         for j in range(len(time_matrix)):
-            covariance_matrix[i][j] = (2 * m) ** 0.5 * b * np.exp(- m * time_matrix[i][j] * 0.5)
+            correlation_matrix[i][j] = (2 * m) ** 0.5 * b * np.exp(- m * time_matrix[i][j] * 0.5)
             if (i == j):
-                covariance_matrix[i][j] = 1
+                correlation_matrix[i][j] = 1
 
-    L = np.linalg.cholesky(covariance_matrix)
+    L = np.linalg.cholesky(correlation_matrix)
     noise = np.dot(L, np.random.normal(loc = 0, scale = np.sqrt(np.sqrt(2 * m * b ** 2)), size = int((tf - t0) / h)))
     return noise
 
