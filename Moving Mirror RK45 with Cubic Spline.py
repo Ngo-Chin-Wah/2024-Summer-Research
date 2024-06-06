@@ -29,7 +29,7 @@ def f(t, S):
     """
     dSdt = np.zeros_like(S)  # Initialize derivative vector
     dSdt[0] = S[1]  # Derivative of position is velocity
-    dSdt[1] = - F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0]  # Derivative of velocity (Newton's second law)
+    dSdt[1] = - F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0] - np.random.normal(loc = 0, scale = 1)  # Derivative of velocity (Newton's second law)
     return dSdt  # Return the derivatives
 
 def RK45(f, t0, tf, S0, h):
