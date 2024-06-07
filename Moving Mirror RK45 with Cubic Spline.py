@@ -190,6 +190,7 @@ t_values, x_values = RK45(f, t0, tf, S0, h)  # Solve the differential equations
 # Cubic spline interpolation
 t_values_splined = np.linspace(t0, tf, int((tf - t0) / 0.001))  # Generate dense time values for spline
 x_values_splined = cubic_spline(t_values, x_values[:, 0], t_values_splined)  # Compute spline values
+v_values_splined = cubic_spline(t_values, x_values[:, 1], t_values_splined)
 # print("t_values_splined:", t_values_splined)  # Print spline time values
 # print("x_values_splined", x_values_splined)  # Print spline position values
 
@@ -220,6 +221,7 @@ plt.grid(True)  # Show grid
 
 plt.subplot(5, 1, 3)  # Create a subplot for the cubic spline
 plt.plot(t_values_splined, x_values_splined)  # Plot spline values
+plt.plot(t_values_splined, v_values_splined)
 plt.xlabel('Time')  # X-axis label
 plt.ylabel('Position')  # Y-axis label
 plt.title('Position against Time (Cubic Spline)')  # Plot title
@@ -232,7 +234,7 @@ plt.ylabel('Power')  # Y-axis label
 plt.title('Frequency Domain Signal')  # Plot title
 plt.grid(True)  # Show grid
 plt.autoscale()
-plt.savefig('moving_mirror_with_force_rk45_cubic_spline.png')  # Save the plot
+plt.savefig('moving_mirror_with_force_rk45_cubic_spline.pdf')  # Save the plot
 
 # while True:
 #     for i in range(len(t_values)):
