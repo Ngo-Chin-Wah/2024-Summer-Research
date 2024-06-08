@@ -39,9 +39,9 @@ print(f"Interpolated value at x = {x}: {interpolated_value}")
 x_values = np.linspace(min(x_points), max(x_points), 100)
 y_values = [lagrange_interpolation(x_points, y_points, xi) for xi in x_values]
 
-plt.plot(x_values, y_values, label='Lagrange Interpolation')
-plt.scatter(x_points, y_points, color='red', label='Data Points')
-plt.scatter([x], [interpolated_value], color='blue', label='Interpolated Value')
+plt.plot(x_values, y_values, label = 'Lagrange Interpolation')
+plt.scatter(x_points, y_points, color = 'red', label = 'Data Points')
+plt.scatter([x], [interpolated_value], color = 'blue', label = 'Interpolated Value')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
