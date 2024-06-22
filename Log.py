@@ -310,6 +310,7 @@ noisiness_op = 40.5
 t_values_spline_op = np.arange(t0, tf, h_interpolate)
 radius_spline_op = np.empty(len(t_values_spline_op), dtype=float)
 t_values_op, x_values_op, noise_iso_op = RK45(noisiness_op, f, t0, tf, S0, h)
+print(len(t_values_op), len(noise_iso_op))
 
 interpolator = interp1d(t_values_op, noise_iso_op, kind='cubic')
 noise_iso_spline_op = interpolator(t_values_spline_op)

@@ -168,6 +168,20 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 10.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
+plt.plot(np.log(t_values_spline), np.log(radius_mean))
+plt.xlabel('ln(t)')
+plt.ylabel('ln(<r>)')
+plt.title('Noise Strength 10.0; 100 Runs')
+plt.grid(True)
+plt.show()
+
+plt.plot(t_values_spline, np.log(radius_mean))
+plt.xlabel('t')
+plt.ylabel('ln(<r>)')
+plt.title('Noise Strength 10.0; 100 Runs')
+plt.grid(True)
+plt.show()
 # %%
 
 noisiness = 20.0
