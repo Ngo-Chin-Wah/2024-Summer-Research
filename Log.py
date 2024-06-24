@@ -10,6 +10,8 @@ Created on Sun Jun 16 20:25:56 2024
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import pandas as pd
+from statsmodels.graphics.tsaplots import plot_acf
 
 def F(t):    
     return F0 * np.cos(omega_f * t)
@@ -20,7 +22,6 @@ def f(noise_temp, noisiness_temp, t, S):
     dSdt[0] = S[1]
     dSdt[1] = - F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0] - noisiness_temp * noise_temp
     return dSdt
-
 
 def RK45(noisiness_temp, f, t0, tf, S0, h):
     t_values = np.array([t0])
@@ -232,7 +233,6 @@ plt.grid(True)
 plt.legend(loc='upper right')
 plt.show()
 # %%
-import pandas as pd
 window_size = 200
 
 data = pd.DataFrame({'Time': t_values_spline0, 'ln<r>': np.log(radius_mean0)})
@@ -305,14 +305,44 @@ plt.grid(True)
 plt.legend(loc='upper right')
 plt.show()
 # %%
-from statsmodels.graphics.tsaplots import plot_acf
-noisiness_op = 40.5
+noisiness_op = 43
 t_values_spline_op = np.arange(t0, tf, h_interpolate)
 radius_spline_op = np.empty(len(t_values_spline_op), dtype=float)
 t_values_op, x_values_op, noise_iso_op = RK45(noisiness_op, f, t0, tf, S0, h)
-print(len(t_values_op), len(noise_iso_op))
 
-interpolator = interp1d(t_values_op, noise_iso_op, kind='cubic')
+interpolator = interp1d(t_values_op[:-1], noise_iso_op, kind='cubic')
 noise_iso_spline_op = interpolator(t_values_spline_op)
 
-plot_acf(noise_iso_op, h_interpolate)
+plot_acf(noise_iso_op)
+# %%
+
+noisiness_op = 43
+
+t_values_spline_op = np.arange(t0, tf, h_interpolate)
+radius_spline_op = np.empty(len(t_values_spline_op), dtype=float)
+t_values_op, x_values_op, noise_iso_op = RK45(noisiness_op, f, t0, tf, S0, h)
+noise_iso_op = noisiness_op * noise_iso_op
+
+interpolator = interp1d(t_values_op[:-1], noise_iso_op, kind='cubic')
+noise_iso_spline_op = interpolator(t_values_spline_op)
+
+t_lag = np.arange(0, 300, 1)
+xi_product = np.empty(0, dtype=float)
+
+for lag in t_lag:
+    xi_product_temp = np.empty(0, dtype=float)
+    for i in range(len(noise_iso_spline_op)):
+        if (i + lag < len(noise_iso_spline_op)):
+            xi_product_temp = np.append(xi_product_temp, noise_iso_spline_op[i] * noise_iso_spline_op[i + lag])
+    xi_product = np.append(xi_product, np.mean(xi_product_temp))
+
+t_lag = h_interpolate * t_lag
+plt.plot(t_lag, xi_product)
+plt.xlabel(r'$|t - t\'|$', usetex=False)
+plt.ylabel(r'$\langle \xi(t) \xi(t\') \rangle$', usetex=False)
+plt.title('Noise Strength:43.0')
+plt.grid(True)
+plt.show()
+
+print(xi_product)
+
