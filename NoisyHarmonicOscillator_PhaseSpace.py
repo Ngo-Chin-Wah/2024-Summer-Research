@@ -72,16 +72,15 @@ omega = (k / m) ** 0.5
 x0 = 0.0
 v0 = 3.0
 t0 = 0.0
-tf = 100
+tf = 20.0
 h = 0.1
-T = 297
 h_interpolate = 0.01
 S0 = np.array([x0, v0])
 error_m = 1e-6
 F0 = 0
 omega_f = np.sqrt(6)
 # %%
-noisiness = 40
+noisiness = 43
 t_values, x_values, noise_iso= RK45(noisiness, f, t0, tf, S0, h)
 radius = np.sqrt((x_values[:, 0]) ** 2 + (m * x_values[:, 1]) ** 2)
 
@@ -92,7 +91,7 @@ plt.title('Noise Strength 42.5; Single Run')
 plt.grid(True)
 plt.show()
 
-plt.plot(t_values, radius)
+plt.plot(t_values, x_values[:, 0])
 plt.xlabel('t')
 plt.ylabel('r')
 plt.title('Noise Strength 42.5; Single Run')

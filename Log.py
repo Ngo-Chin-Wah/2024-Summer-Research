@@ -88,8 +88,8 @@ h = 0.1
 T = 297
 h_interpolate = 0.01
 S0 = np.array([x0, v0])
-error_m = 1e-6
-F0 = 0
+error_m = 1e-5
+F0 = 1
 omega_f = np.sqrt(6)
 # %%
 
@@ -191,7 +191,7 @@ radius_mean40 = np.mean(radius_spline40, axis=0)
 
 noisiness = 43
 t_values_spline50 = np.arange(t0, tf, h_interpolate)
-radius_spline50 = np.empty(len(t_values_spline10), dtype=float)
+radius_spline50 = np.empty(len(t_values_spline50), dtype=float)
 
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
@@ -205,32 +205,34 @@ for i in range(100):
 radius_spline50 = radius_spline50[1:]
 radius_mean50 = np.mean(radius_spline50, axis=0)
 
-plt.plot(t_values_spline0, radius_mean0, label='40')
-plt.plot(t_values_spline5, radius_mean5, label='40.5')
-plt.plot(t_values_spline10, radius_mean10, label='41')
-plt.plot(t_values_spline20, radius_mean20, label='41.5')
-plt.plot(t_values_spline30, radius_mean30, label='42')
-plt.plot(t_values_spline40, radius_mean40, label='42.5')
-plt.plot(t_values_spline50, radius_mean50, label='43')
+# plt.plot(t_values_spline0, radius_mean0, label='40')
+# plt.plot(t_values_spline5, radius_mean5, label='40.5')
+# plt.plot(t_values_spline10, radius_mean10, label='41')
+# plt.plot(t_values_spline20, radius_mean20, label='41.5')
+# plt.plot(t_values_spline30, radius_mean30, label='42')
+# plt.plot(t_values_spline40, radius_mean40, label='42.5')
+plt.plot(t_values_spline50, radius_mean50)
 plt.xlabel('t')
 plt.ylabel('<r>')
-plt.title('100 Runs of Different Noise Strengths')
+plt.title('100 Runs of Noise Strength 43.0')
 plt.grid(True)
 plt.legend(loc='lower left')
+plt.savefig('Noise Strength 43.pdf')
 plt.show()
 
-plt.plot(t_values_spline0, np.log(radius_mean0), label='40')
-plt.plot(t_values_spline5, np.log(radius_mean5), label='40.5')
-plt.plot(t_values_spline10, np.log(radius_mean10), label='41')
-plt.plot(t_values_spline20, np.log(radius_mean20), label='41.5')
-plt.plot(t_values_spline30, np.log(radius_mean30), label='42')
-plt.plot(t_values_spline40, np.log(radius_mean40), label='42.5')
-plt.plot(t_values_spline50, np.log(radius_mean50), label='43')
+# plt.plot(t_values_spline0, np.log(radius_mean0), label='40')
+# plt.plot(t_values_spline5, np.log(radius_mean5), label='40.5')
+# plt.plot(t_values_spline10, np.log(radius_mean10), label='41')
+# plt.plot(t_values_spline20, np.log(radius_mean20), label='41.5')
+# plt.plot(t_values_spline30, np.log(radius_mean30), label='42')
+# plt.plot(t_values_spline40, np.log(radius_mean40), label='42.5')
+plt.plot(t_values_spline50, np.log(radius_mean50))
 plt.xlabel('t')
 plt.ylabel('ln(<r>)')
-plt.title('100 Runs of Different Noise Strengths')
+plt.title('100 Runs of Noise Strength 43.0')
 plt.grid(True)
 plt.legend(loc='upper right')
+plt.savefig('Noise Strength 43 Semi Log.pdf')
 plt.show()
 # %%
 window_size = 200
