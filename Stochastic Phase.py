@@ -47,7 +47,7 @@ def RK45(f, t0, tf, S0, h):
         z_new = x + (16 / 135) * k1 + (6656 / 12825) * k3 + (28561 / 56430) * k4 - (9 / 50) * k5 + (2 / 55) * k6
         error = abs(z_new[0] - x_new[0])
         s = 0.84 * (error_m / error) ** (1 / 4)
-        print(t, h)
+        # print(t, h)
 
         while (error > error_m):
             h = s * h
@@ -61,7 +61,7 @@ def RK45(f, t0, tf, S0, h):
             z_new = x + (16 / 135) * k1 + (6656 / 12825) * k3 + (28561 / 56430) * k4 - (9 / 50) * k5 + (2 / 55) * k6
             error = abs(z_new[0] - x_new[0])
             s = (error_m / error) ** (1 / 5)
-            print(t, h)
+            # print(t, h)
 
         x_values = np.concatenate((x_values, [x_new]), axis=0)
         t_values = np.append(t_values, t + h)
@@ -102,7 +102,7 @@ for i in range(1):
     v_values_spline = interpolator(t_values_spline)
     radius_temp = np.sqrt((x_values_spline) ** 2 + (m * v_values_spline) ** 2)
     radius_spline = np.vstack([radius_spline, radius_temp])
-    print(i)
+    # print(i)
 radius_spline = radius_spline[1:]
 radius_mean = np.mean(radius_spline, axis=0)
 
@@ -116,7 +116,7 @@ for i in range(1):
     v_values_spline_ps = interpolator(t_values_spline)
     radius_temp = np.sqrt((x_values_spline_ps) ** 2 + (m * v_values_spline_ps) ** 2)
     radius_spline_ps = np.vstack([radius_spline_ps, radius_temp])
-    print(i)
+    # print(i)
 radius_spline_ps = radius_spline_ps[1:]
 radius_mean_ps = np.mean(radius_spline_ps, axis=0)
 
