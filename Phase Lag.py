@@ -136,23 +136,6 @@ plt.savefig('Phase Lag.pdf')
 plt.show()
 # %%
 
-# from scipy.ndimage import gaussian_filter1d
-# smooth = gaussian_filter1d(phase_lags, 10)
-
-# # compute second derivative
-# smooth_d2 = np.gradient(np.gradient(smooth))
-
-# # find switching points
-# infls = np.where(np.diff(np.sign(smooth_d2)))[0]
-# print(freqs[infls])
-
-# # plot results
-# plt.plot(freqs, phase_lags, label='Noisy Data')
-# plt.plot(freqs, smooth, label='Smoothed Data')
-# plt.legend()
-# plt.show()
-# %%
-
 window_size = 1
 data = pd.DataFrame({'Frequency': freqs, 'Phase Lag': phase_lags})
 data['Filtered'] = data['Phase Lag'].rolling(window=window_size).mean()
