@@ -47,7 +47,7 @@ def RK45(f, t0, tf, S0, h):
         z_new = x + (16 / 135) * k1 + (6656 / 12825) * k3 + (28561 / 56430) * k4 - (9 / 50) * k5 + (2 / 55) * k6
         error = abs(z_new[0] - x_new[0])
         s = 0.84 * (error_m / error) ** (1 / 4)
-        # print(t, h)
+        print(t, h)
 
         while (error > error_m):
             h = s * h
@@ -61,7 +61,7 @@ def RK45(f, t0, tf, S0, h):
             z_new = x + (16 / 135) * k1 + (6656 / 12825) * k3 + (28561 / 56430) * k4 - (9 / 50) * k5 + (2 / 55) * k6
             error = abs(z_new[0] - x_new[0])
             s = (error_m / error) ** (1 / 5)
-            # print(t, h)
+            print(t, h)
 
         x_values = np.concatenate((x_values, [x_new]), axis=0)
         t_values = np.append(t_values, t + h)
@@ -89,7 +89,14 @@ error_m = 1e-6
 F0 = 1
 noisiness = 0
 noisiness_f = 0
-omega_f = np.sqrt(k / m) + 1
+omega_f = 100
+
+# %%
+t_values, x_values, noise_iso = RK45(f, t0, tf, S0, h)
+
+plt.plot(t_values, x_values)
+plt.show()
+
 # %%
 noisiness_f = 0
 t_values_spline = np.arange(t0, tf, h_interpolate)

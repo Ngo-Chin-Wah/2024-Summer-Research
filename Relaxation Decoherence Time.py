@@ -138,7 +138,7 @@ T2 = 1 / (np.pi * fwhm)
 print('Relaxation Time T1:', T1)
 print('Dephasing Time T2:', T2)
 
-plt.plot(freqs[:100], np.abs(X)[:100])
+plt.plot(freqs[:300], np.abs(X)[:300])
 plt.xlabel(r'Frequency', usetex=True)
 plt.ylabel(r'Amplitude', usetex=True)
 plt.title(r'Fourier Transform', usetex=True)
@@ -146,17 +146,24 @@ plt.grid(True)
 plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
 # %%
+freqs_new = freqs[:100]
+abs_new = np.abs(X)[:100]
+freqs_spline = np.arange(np.min(freqs_new), np.max(freqs_new), 0.001)
 
-XX = fft(X)
-freqs_XX = fftfreq(len(freqs), h_interpolate)
+interpolator = interp1d(freqs_new, abs_new, kind='cubic')
+abs_spline = interpolator(freqs_spline)
 
-XX = XX[freqs_XX >= 0]
-freqs_XX = freqs_XX[freqs_XX >= 0]
-
-plt.plot(freqs_XX[:100], np.abs(XX)[:100])
-plt.xlabel(r'Frequency', usetex=True)
-plt.ylabel(r'Amplitude', usetex=True)
-plt.title(r'Fourier Transform', usetex=True)
-plt.grid(True)
-plt.savefig('Relaxation Decoherence FFT.pdf')
+plt.plot(freqs_spline, abs_spline)
 plt.show()
+# %%
+
+abs_max = np.max(abs_spline)
+freqs_above = np.empty(0, dtype=float)
+
+for i in range(len(freqs_spline)):
+    if (abs_spline[i] >= 0.5 * abs_max):
+        print(freqs_spline[i])
+        freqs_above = np.append(freqs_above, freqs_spline[i])
+
+T2 = freqs_above[-1] - freqs_above[0]
+print('T2:', T2)

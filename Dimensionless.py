@@ -133,28 +133,48 @@ def RK45(f, tau0, tauf, S0, h):
 
 global error_m, omega_f, F0, h_interpolate, noisiness, noisiness_f
 
-zeta = 0.05
-
 x0 = 0.0
 v0 = 3.0
 tau0 = 0.0
-tauf = 30.0
+tauf = 70.0
 S0 = np.array([x0, v0])
 
 h = 0.1
 h_interpolate = 0.01
 error_m = 1e-6
 
-F0 = 1
-omega_f = 1
+F0 = 0
+omega_f = 100
 
 noisiness = 0
 noisiness_f = 0
 # %%
+zeta = 0.5
 t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
 
 plt.plot(t_values, x_values)
 plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
 plt.ylabel(r'$x(L_0)$', usetex=True)
 plt.grid(True)
+plt.title(r'Underdamped; $r<\omega$', usetex=True)
+plt.show()
+
+zeta = 1
+t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
+
+plt.plot(t_values, x_values)
+plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
+plt.ylabel(r'$x(L_0)$', usetex=True)
+plt.grid(True)
+plt.title(r'Critically Damped; $r=\omega$', usetex=True)
+plt.show()
+
+zeta = 1.5
+t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
+
+plt.plot(t_values, x_values)
+plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
+plt.ylabel(r'$x(L_0)$', usetex=True)
+plt.grid(True)
+plt.title(r'Overdamped; $r=\omega$', usetex=True)
 plt.show()
