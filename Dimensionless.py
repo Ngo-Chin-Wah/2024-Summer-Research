@@ -8,17 +8,17 @@ Created on Thurs Jul 11 15:34:47 2024
 Attributes:
     error_m (float): Description
     F0 (int): Description
-    h (float): Description
-    h_interpolate (float): Description
-    noisiness (int): Description
-    noisiness_f (int): Description
-    omega_f (int): Description
+    h (float): Initial size of time-step in RK45
+    h_interpolate (float): Desired size of time-step in interpolation
+    noisiness (int): Amplitude of stochastic noise
+    noisiness_f (int): Amplitude of stochastic phase shift
+    omega_f (int): Driving frequency
     S0 (TYPE): Description
-    tau0 (float): Description
-    tauf (float): Description
-    v0 (float): Description
-    x0 (float): Description
-    zeta (float): Description
+    tau0 (float): Initial time
+    tauf (float): Final time
+    v0 (float): Initial velocity
+    x0 (float): Initial position
+    zeta (float): Damping ratio
 """
 
 # %%
@@ -150,31 +150,19 @@ noisiness = 0
 noisiness_f = 0
 # %%
 zeta = 0.5
-t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
-
-plt.plot(t_values, x_values)
-plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
-plt.ylabel(r'$x(L_0)$', usetex=True)
-plt.grid(True)
-plt.title(r'Underdamped; $r<\omega$', usetex=True)
-plt.show()
-
+t_values_underdamped, x_values_underdamped, noise_iso_underdamped = RK45(f, tau0, tauf, S0, h)
 zeta = 1
-t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
-
-plt.plot(t_values, x_values)
-plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
-plt.ylabel(r'$x(L_0)$', usetex=True)
-plt.grid(True)
-plt.title(r'Critically Damped; $r=\omega$', usetex=True)
-plt.show()
-
+t_values_criticallydamped, x_values_criticallydamped, noise_iso_criticallydamped = RK45(f, tau0, tauf, S0, h)
 zeta = 1.5
-t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
+t_values_overdamped, x_values_overdamped, noise_iso_overdamped = RK45(f, tau0, tauf, S0, h)
 
-plt.plot(t_values, x_values)
+plt.plot(t_values_underdamped, x_values_underdamped[:, 0], label='Underdamped')
+plt.plot(t_values_criticallydamped, x_values_criticallydamped[:, 0], label='Critically Damped')
+plt.plot(t_values_overdamped, x_values_overdamped[:, 0], label='Overdamped')
 plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
 plt.ylabel(r'$x(L_0)$', usetex=True)
 plt.grid(True)
 plt.title(r'Overdamped; $r=\omega$', usetex=True)
+plt.legend()
+plt.savefig('Dimensionless_Overdamped.pdf')
 plt.show()
