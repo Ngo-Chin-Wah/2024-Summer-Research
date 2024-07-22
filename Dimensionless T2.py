@@ -1,30 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thurs Jul 11 15:34:47 2024
+Created on Sat Jul 20 17:45:19 2024
 
 @author: nathanngo
-
-Attributes:
-    error_m (float): Description
-    F0 (int): Description
-    h (float): Initial size of time-step in RK45
-    h_interpolate (float): Desired size of time-step in interpolation
-    noisiness (int): Amplitude of stochastic noise
-    noisiness_f (int): Amplitude of stochastic phase shift
-    omega_f (int): Driving frequency
-    S0 (TYPE): Description
-    tau0 (float): Initial time
-    tauf (float): Final time
-    v0 (float): Initial velocity
-    x0 (float): Initial position
-    zeta (float): Damping ratio
 """
 
 # %%
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+from scipy.fft import fft, fftfreq
 
 
 def F(noise_f_temp, tau):
@@ -136,48 +123,46 @@ global error_m, omega_f, F0, h_interpolate, noisiness, noisiness_f
 x0 = 0.0
 v0 = 3.0
 tau0 = 0.0
-tauf = 70.0
+tauf = 100.0
 S0 = np.array([x0, v0])
 
 h = 0.1
 h_interpolate = 0.01
 error_m = 1e-6
+zeta = 0.5
 
-F0 = 1
-omega_f = 10
+F0 = 15
+omega_f = 2.0
 
 noisiness = 0
 noisiness_f = 0
-
 # %%
-zeta = 0.1
-t_values, x_values, noise_iso = RK45(f, tau0, tauf, S0, h)
-t_values_highfreq, x_values_highfreq, noise_iso_highfreq = RK45(f, tau0, tauf, S0, h)
-plt.plot(t_values, x_values[:, 0], label='Undriven')
-plt.plot(t_values_highfreq, x_values_highfreq[:, 0], label='Driven by High Frequency Force')
-plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
-plt.ylabel(r'$x(L_0)$', usetex=True)
+t_values_spline = np.arange(tau0, tauf, h_interpolate)
+
+t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
+interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
+x_values_spline = interpolator(t_values_spline)
+# %%
+
+X = fft(x_values_spline)
+freqs = fftfreq(len(t_values_spline), h_interpolate)
+
+X = X[freqs >= 0]
+freqs = freqs[freqs >= 0]
+
+plt.plot(freqs, np.abs(X))
+plt.xlabel(r'Frequency', usetex=True)
+plt.ylabel(r'Amplitude', usetex=True)
+plt.title(r'Fourier Transform', usetex=True)
 plt.grid(True)
-plt.title(r'Effect of High Frequency Driving', usetex=True)
-plt.legend()
-plt.savefig('Dimensionless_High Frequency Force.pdf')
+plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
-
 # %%
-zeta = 0.5
-t_values_underdamped, x_values_underdamped, noise_iso_underdamped = RK45(f, tau0, tauf, S0, h)
-zeta = 1
-t_values_criticallydamped, x_values_criticallydamped, noise_iso_criticallydamped = RK45(f, tau0, tauf, S0, h)
-zeta = 1.5
-t_values_overdamped, x_values_overdamped, noise_iso_overdamped = RK45(f, tau0, tauf, S0, h)
 
-plt.plot(t_values_underdamped, x_values_underdamped[:, 0], label='Underdamped')
-plt.plot(t_values_criticallydamped, x_values_criticallydamped[:, 0], label='Critically Damped')
-plt.plot(t_values_overdamped, x_values_overdamped[:, 0], label='Overdamped')
-plt.xlabel(r'$\tau(\frac{1}{\omega_m})$', usetex=True)
-plt.ylabel(r'$x(L_0)$', usetex=True)
+plt.plot(freqs[:400], np.abs(X)[:400])
+plt.xlabel(r'Frequency', usetex=True)
+plt.ylabel(r'Amplitude', usetex=True)
+plt.title(r'Fourier Transform', usetex=True)
 plt.grid(True)
-plt.title(r'Different Damping', usetex=True)
-plt.legend()
-plt.savefig('Dimensionless_Different damping.pdf')
+plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
