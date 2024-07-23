@@ -129,11 +129,10 @@ S0 = np.array([x0, v0])
 h = 0.1
 h_interpolate = 0.01
 error_m = 1e-6
-zeta = 0.5
+zeta = 0.1
 
-F0 = 15
-omega_f = 2.0
-
+F0 = 1
+omega_f = 4
 noisiness = 0
 noisiness_f = 0
 # %%
@@ -159,7 +158,7 @@ plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
 # %%
 
-plt.plot(freqs[:400], np.abs(X)[:400])
+plt.plot(freqs[:100], np.abs(X)[:100])
 plt.xlabel(r'Frequency', usetex=True)
 plt.ylabel(r'Amplitude', usetex=True)
 plt.title(r'Fourier Transform', usetex=True)

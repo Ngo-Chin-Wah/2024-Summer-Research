@@ -148,14 +148,9 @@ plt.plot(x_values_spline, v_values_spline)
 plt.xlabel(r'$x$', usetex=True)
 plt.ylabel(r'$p$', usetex=True)
 plt.grid(True)
+plt.title(r'Phase Space Diagram; Underdamped', usetex=True)
+plt.savefig('Dimensionless T1_Phase Space.pdf')
 plt.show()
-
-plt.plot(t_values_spline, x_values_spline)
-plt.xlabel(r'$t(\frac{1}{\omega_m})$', usetex=True)
-plt.ylabel(r'$x(L_0)$', usetex=True)
-plt.grid(True)
-plt.show()
-
 # %%
 r_values_spline = np.sqrt(x_values_spline ** 2 + v_values_spline ** 2)
 r_max = np.max(r_values_spline)
