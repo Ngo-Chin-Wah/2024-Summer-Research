@@ -132,16 +132,16 @@ error_m = 1e-6
 zeta = 0.1
 
 F0 = 1
-omega_f = 4
 noisiness = 0
 noisiness_f = 0
 # %%
+omega_f = 1
+
 t_values_spline = np.arange(tau0, tauf, h_interpolate)
 
 t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
 interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
 x_values_spline = interpolator(t_values_spline)
-# %%
 
 X = fft(x_values_spline)
 freqs = fftfreq(len(t_values_spline), h_interpolate)
@@ -149,19 +149,98 @@ freqs = fftfreq(len(t_values_spline), h_interpolate)
 X = X[freqs >= 0]
 freqs = freqs[freqs >= 0]
 
-plt.plot(freqs, np.abs(X))
+plt.plot(freqs[:30], np.abs(X)[:30])
 plt.xlabel(r'Frequency', usetex=True)
 plt.ylabel(r'Amplitude', usetex=True)
-plt.title(r'Fourier Transform', usetex=True)
+plt.title(r'Fourier Transform; Underdamped; No Noise', usetex=True)
 plt.grid(True)
 plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
 # %%
+omega_f = 1.2
 
-plt.plot(freqs[:100], np.abs(X)[:100])
+t_values_spline = np.arange(tau0, tauf, h_interpolate)
+
+t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
+interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
+x_values_spline = interpolator(t_values_spline)
+
+X = fft(x_values_spline)
+freqs = fftfreq(len(t_values_spline), h_interpolate)
+
+X = X[freqs >= 0]
+freqs = freqs[freqs >= 0]
+
+plt.plot(freqs[:30], np.abs(X)[:30])
 plt.xlabel(r'Frequency', usetex=True)
 plt.ylabel(r'Amplitude', usetex=True)
-plt.title(r'Fourier Transform', usetex=True)
+plt.title(r'Fourier Transform; Underdamped; No Noise', usetex=True)
+plt.grid(True)
+plt.savefig('Relaxation Decoherence FFT.pdf')
+plt.show()
+# %%
+omega_f = 1.4
+
+t_values_spline = np.arange(tau0, tauf, h_interpolate)
+
+t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
+interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
+x_values_spline = interpolator(t_values_spline)
+
+X = fft(x_values_spline)
+freqs = fftfreq(len(t_values_spline), h_interpolate)
+
+X = X[freqs >= 0]
+freqs = freqs[freqs >= 0]
+
+plt.plot(freqs[:30], np.abs(X)[:30])
+plt.xlabel(r'Frequency', usetex=True)
+plt.ylabel(r'Amplitude', usetex=True)
+plt.title(r'Fourier Transform; Underdamped; No Noise', usetex=True)
+plt.grid(True)
+plt.savefig('Relaxation Decoherence FFT.pdf')
+plt.show()
+# %%
+omega_f = 1.6
+
+t_values_spline = np.arange(tau0, tauf, h_interpolate)
+
+t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
+interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
+x_values_spline = interpolator(t_values_spline)
+
+X = fft(x_values_spline)
+freqs = fftfreq(len(t_values_spline), h_interpolate)
+
+X = X[freqs >= 0]
+freqs = freqs[freqs >= 0]
+
+plt.plot(freqs[:30], np.abs(X)[:30])
+plt.xlabel(r'Frequency', usetex=True)
+plt.ylabel(r'Amplitude', usetex=True)
+plt.title(r'Fourier Transform; Underdamped; No Noise', usetex=True)
+plt.grid(True)
+plt.savefig('Relaxation Decoherence FFT.pdf')
+plt.show()
+# %%
+omega_f = 1.8
+
+t_values_spline = np.arange(tau0, tauf, h_interpolate)
+
+t_values_temp, x_values_temp, noise_iso = RK45(f, tau0, tauf, S0, h)
+interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
+x_values_spline = interpolator(t_values_spline)
+
+X = fft(x_values_spline)
+freqs = fftfreq(len(t_values_spline), h_interpolate)
+
+X = X[freqs >= 0]
+freqs = freqs[freqs >= 0]
+
+plt.plot(freqs[:30], np.abs(X)[:30])
+plt.xlabel(r'Frequency', usetex=True)
+plt.ylabel(r'Amplitude', usetex=True)
+plt.title(r'Fourier Transform; Underdamped; No Noise', usetex=True)
 plt.grid(True)
 plt.savefig('Relaxation Decoherence FFT.pdf')
 plt.show()
