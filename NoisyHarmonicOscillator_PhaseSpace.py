@@ -1,19 +1,56 @@
+# %%
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 def F(t):    
+    """
+    Calculates the driving force at time t.
+    
+    Parameters:
+        t (float): Time variable.
+
+    Returns:
+        float: The driving force at time t.
+    """
     return F0 * np.cos(omega_f * t)
 
-
 def f(noise_temp, noisiness_temp, t, S):
+    """
+    Defines the function representing the system of differential equations.
+    
+    Parameters:
+        noise_temp (float): The noise term at time t.
+        noisiness_temp (float): The amplitude of the noise.
+        t (float): Time variable.
+        S (numpy.ndarray): State vector [position, velocity].
+
+    Returns:
+        numpy.ndarray: Derivatives of the state vector.
+    """
     dSdt = np.zeros_like(S)
     dSdt[0] = S[1]
     dSdt[1] = - F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0] - noisiness_temp * noise_temp
     return dSdt
 
-
 def RK45(noisiness_temp, f, t0, tf, S0, h):
+    """
+    Implements the Runge-Kutta-Fehlberg method (RK45) for solving ordinary differential equations.
+
+    Parameters:
+        noisiness_temp (float): The amplitude of the noise.
+        f (function): Function defining the system of differential equations.
+        t0 (float): Initial time.
+        tf (float): Final time.
+        S0 (numpy.ndarray): Initial state vector [position, velocity].
+        h (float): Step size.
+
+    Returns:
+        numpy.ndarray: Array of time values.
+        numpy.ndarray: Array of state vectors.
+        numpy.ndarray: Array of noise values.
+    """
     t_values = np.array([t0])
     x_values = np.array([[S0[0], S0[1]]])
     t = t0
@@ -59,16 +96,19 @@ def RK45(noisiness_temp, f, t0, tf, S0, h):
         t_values = np.append(t_values, t + h)
         t = t + h
     return t_values, x_values, noise_iso
+
 # %%
 
 global r, omega, error_m, omega_f, F0, h_interpolate, noisiness
 
+# Parameters of the system
 m = 0.5
 k = 3.0
 gamma = 0.1
 r = gamma / (2 * m)
 omega = (k / m) ** 0.5
 
+# Initial conditions and simulation parameters
 x0 = 0.0
 v0 = 3.0
 t0 = 0.0
@@ -79,11 +119,13 @@ S0 = np.array([x0, v0])
 error_m = 1e-6
 F0 = 0
 omega_f = np.sqrt(6)
+
 # %%
 noisiness = 43
 t_values, x_values, noise_iso= RK45(noisiness, f, t0, tf, S0, h)
 radius = np.sqrt((x_values[:, 0]) ** 2 + (m * x_values[:, 1]) ** 2)
 
+# Plot phase space (position vs momentum)
 plt.plot(x_values[:, 0], m * x_values[:, 1])
 plt.xlabel('x')
 plt.ylabel('p')
@@ -91,12 +133,14 @@ plt.title('Noise Strength 42.5; Single Run')
 plt.grid(True)
 plt.show()
 
+# Plot position vs time
 plt.plot(t_values, x_values[:, 0])
 plt.xlabel('t')
 plt.ylabel('r')
 plt.title('Noise Strength 42.5; Single Run')
 plt.grid(True)
 plt.show()
+
 # %%
 noisiness = 20.0
 t_values, x_values, noise_iso= RK45(noisiness, f, t0, tf, S0, h)
@@ -118,6 +162,7 @@ plt.ylabel('r')
 plt.title('Noise Strength 20.0; Single Run')
 plt.grid(True)
 plt.show()
+
 # %%
 noisiness = 30.0
 t_values, x_values, noise_iso= RK45(noisiness, f, t0, tf, S0, h)
@@ -139,12 +184,14 @@ plt.ylabel('r')
 plt.title('Noise Strength 30.0; Single Run')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 10.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -177,12 +224,14 @@ plt.ylabel('ln(<r>)')
 plt.title('Noise Strength 10.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 20.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -201,12 +250,14 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 20.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 30.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -225,12 +276,14 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 30.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 40.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -249,12 +302,14 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 40.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 50.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -273,12 +328,14 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 50.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 noisiness = 60.0
 t_values_spline = np.arange(t0, tf, h_interpolate)
 radius_spline = np.empty(len(t_values_spline), dtype=float)
 
+# Perform 100 runs with noise and cubic interpolation
 for i in range(100):
     t_values_temp, x_values_temp, noise_iso = RK45(noisiness, f, t0, tf, S0, h)
     interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
@@ -297,12 +354,14 @@ plt.ylabel('<r>')
 plt.title('Noise Strength 60.0; 100 Runs')
 plt.grid(True)
 plt.show()
+
 # %%
 
 n = 100
 radius_mean_mean_y = np.empty(0, dtype=float)
 noisiness = np.arange(40, 65, 0.05)
 
+# Run simulation over a range of noise strengths and average results
 for noisiness_temp in noisiness:
     radius_mean_mean = 0
     for i in range(n):
@@ -322,10 +381,13 @@ plt.ylabel('<<r>>')
 plt.title('Original Data')
 plt.grid(True)
 plt.show()
+
 # %%
+
 import pandas as pd
 data = pd.DataFrame({'Noise Strength': noisiness, '<<r>>': radius_mean_mean_y})
 
+# Smooth the data using a rolling window
 window_size = 30
 data['filtered'] = data['<<r>>'].rolling(window=window_size).mean()
 
@@ -339,12 +401,14 @@ plt.legend()
 plt.show()
 
 # %%
+
 plt.plot(data['Noise Strength'], data['filtered'])
 plt.xlabel('Noise Strength')
 plt.ylabel('<<r>>')
 plt.title('Smoothed Data')
 plt.grid(True)
 plt.show()
+
 # %%
 
 plt.plot(noisiness, radius_mean_mean_y, label = 'Original Data')

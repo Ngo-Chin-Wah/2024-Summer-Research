@@ -14,17 +14,52 @@ from scipy.interpolate import interp1d
 from scipy.fft import fft, fftfreq
 import pandas as pd
 
-def F(t):    
+def F(t):
+    """
+    Calculates the driving force at time t.
+
+    Parameters:
+        t (float): Time variable.
+
+    Returns:
+        float: The driving force at time t.
+    """
     return F0 * np.cos(omega_f * t)
 
 
 def f(noise_temp, noisiness_temp, t, S):
+    """
+    Defines the system of differential equations for the oscillator.
+
+    Parameters:
+        noise_temp (float): Instantaneous noise value.
+        noisiness_temp (float): Amplitude of noise.
+        t (float): Time variable.
+        S (numpy.ndarray): State vector [position, velocity].
+
+    Returns:
+        numpy.ndarray: Derivatives of the state vector.
+    """
     dSdt = np.zeros_like(S)
     dSdt[0] = S[1]
     dSdt[1] = F(t) / m - 2 * r * S[1] - (omega ** 2) * S[0] - noisiness_temp * noise_temp
     return dSdt
 
 def RK45(noisiness_temp, f, t0, tf, S0, h):
+    """
+    Implements the Runge-Kutta-Fehlberg method (RK45) for solving ODEs.
+
+    Parameters:
+        noisiness_temp (float): Amplitude of noise.
+        f (function): Function defining the system of differential equations.
+        t0 (float): Initial time.
+        tf (float): Final time.
+        S0 (numpy.ndarray): Initial state vector [position, velocity].
+        h (float): Step size.
+
+    Returns:
+        tuple: Arrays of time values, state vectors, and noise values.
+    """
     t_values = np.array([t0])
     x_values = np.array([[S0[0], S0[1]]])
     t = t0
@@ -34,7 +69,7 @@ def RK45(noisiness_temp, f, t0, tf, S0, h):
     while t < tf:
         noise_temp = np.random.normal(loc=0, scale=1)
         noise_iso = np.append(noise_iso, noise_temp)
-        n = n + 1
+        n += 1
         x = x_values[-1, :]
         k1 = h * f(noise_temp, noisiness_temp, t, x)
         k2 = h * f(noise_temp, noisiness_temp, t + (1 / 4) * h, x + (1 / 4) * k1)
@@ -70,12 +105,14 @@ def RK45(noisiness_temp, f, t0, tf, S0, h):
 
         x_values = np.concatenate((x_values, [x_new]), axis=0)
         t_values = np.append(t_values, t + h)
-        t = t + h
+        t += h
     return t_values, x_values, noise_iso
+
 # %%
 
 global r, omega, error_m, omega_f, F0, h_interpolate, noisiness
 
+# Parameters
 m = 0.5
 k = 3
 gamma = 0.1
@@ -94,13 +131,16 @@ S0 = np.array([x0, v0])
 error_m = 1e-4
 F0 = 1
 noisiness = 0
+
 # %%
 
+# Frequency sweep parameters
 linewidth = gamma / m
 freqs = np.arange(omega - 8 * linewidth, omega + 8 * linewidth, 0.01 * linewidth)
 t_values_spline = np.arange(t0, tf, h_interpolate)
 phase_lags = np.empty(0, dtype=float)
 
+# Sweep through frequencies and compute phase lags
 for freq in freqs:
     omega_f = freq
     force = np.empty(0, dtype=float)
@@ -127,6 +167,7 @@ for freq in freqs:
     
     phase_lags = np.append(phase_lags, phase_lag)
 
+# Plot phase lags versus driving frequency
 plt.plot(freqs, phase_lags)
 plt.xlabel('Angular Frequency of the Driving Force')
 plt.ylabel('Absolute Value of Phase Lag')
@@ -134,8 +175,10 @@ plt.title(r'Natural Frequency = $\sqrt{3}$; Linewidth = $0.1$')
 plt.grid(True)
 plt.savefig('Phase Lag.pdf')
 plt.show()
+
 # %%
 
+# Smoothing and inflection point detection
 window_size = 1
 data = pd.DataFrame({'Frequency': freqs, 'Phase Lag': phase_lags})
 data['Filtered'] = data['Phase Lag'].rolling(window=window_size).mean()
@@ -146,7 +189,7 @@ data['ddy'] = np.gradient(data['Filtered'], data['Frequency'])
 threshold = 1.0
 data['significant_ddy'] = np.where(np.abs(data['ddy']) > threshold, data['ddy'], 0)
 data['sign_change'] = np.sign(data['significant_ddy']).diff().ne(0).astype(int)
-inflection_points =data[data['sign_change'] == 1]
+inflection_points = data[data['sign_change'] == 1]
 
 print("Inflection points:")
 print(inflection_points[['Frequency', 'Filtered']])
@@ -163,10 +206,10 @@ plt.show()
 
 # %%
 
-# Filter inflection points between frequency 2 and 3
+# Filter inflection points between frequency 3.5 and 4.5
 filtered_inflection_points = inflection_points[(inflection_points['Frequency'] >= 3.5) & (inflection_points['Frequency'] <= 4.5)]
 
-# Print the inflection points one by one
-print("Inflection points between frequency 2 and 3:")
+# Print the inflection points within the specified range
+print("Inflection points between frequency 3.5 and 4.5:")
 for index, row in filtered_inflection_points.iterrows():
     print(f"Index: {index}, Frequency: {row['Frequency']}, Filtered: {row['Filtered']}")

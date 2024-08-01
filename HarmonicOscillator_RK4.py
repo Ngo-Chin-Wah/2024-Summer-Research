@@ -5,45 +5,40 @@ from vpython import *
 
 def f(t, S, r, omega):
     """
-    Define the function for the second-order ordinary differential equation:
+    Defines the system of first-order differential equations from the original second-order ODE:
         x'' + 2 * r * x' + omega ** 2 * x = 0
-    as a system of first-order differential equations:
-        S[0] = x
-        S[1] = x'
 
     Parameters:
-        t: float - Time
-        S: array-like - Array of dependent variable values [x, x']
-        r: float - Damping coefficient
-        omega: float - Angular frequency
+        t (float): Time variable.
+        S (array-like): Array containing [x, x'], where x is position and x' is velocity.
+        r (float): Damping coefficient.
+        omega (float): Angular frequency.
 
     Returns:
-        dSdt: array-like - Array of derivatives [x', x'']
+        array-like: Array of derivatives [x', x''].
     """
     dSdt = np.zeros_like(S)
-    dSdt[0] = S[1]  # x' = y[1]
-    dSdt[1] = -2 * r * S[1] - (omega ** 2) * S[0]
+    dSdt[0] = S[1]  # x' = S[1]
+    dSdt[1] = -2 * r * S[1] - (omega ** 2) * S[0]  # x'' = -2r * x' - omega^2 * x
     return dSdt
 
 def explicit_RK4(f, t0, tf, y0, r, omega, h):
     """
-    Solve the second-order ordinary differential equation using the
-    explicit fourth-order Runge-Kutta method.
+    Solves a system of differential equations using the fourth-order Runge-Kutta (RK4) method.
 
     Parameters:
-        f: function(t, y, r, omega) - The function defining the differential equation
-        t0: float - Initial value of the independent variable (time)
-        tf: float - Final value of the independent variable
-        y0: array-like - Initial value of the dependent variable(s) [x0, v0]
-        r: float - Damping coefficient
-        omega: float - Angular frequency
-        h: float - Step size
+        f (function): The function defining the differential equation.
+        t0 (float): Initial time.
+        tf (float): Final time.
+        y0 (array-like): Initial values [x0, v0].
+        r (float): Damping coefficient.
+        omega (float): Angular frequency.
+        h (float): Step size.
 
     Returns:
-        t_values: array - Array of time values
-        x_values: array - Array of solution values corresponding to each time
+        array: Array of time values.
+        array: Array of solution values for each time step.
     """
-
     num_steps = int((tf - t0) / h)
     t_values = np.linspace(t0, tf, num_steps + 1)
     x_values = np.zeros((len(t_values), len(S0)))
@@ -66,33 +61,40 @@ def explicit_RK4(f, t0, tf, y0, r, omega, h):
 m = float(input("Mass of the mirror:"))
 k = float(input("Spring constant:"))
 gamma = float(input("gamma:"))
-r = gamma / (2 * m)
-omega = (k / m) ** 0.5
+r = gamma / (2 * m)  # Damping coefficient
+omega = (k / m) ** 0.5  # Angular frequency
 x0 = float(input("Initial position:"))
 v0 = float(input("Initial velocity:"))
-t0 = 0.0  
-tf = 5.0
-h = 0.00001 
-S0 = np.array([x0, v0])
+t0 = 0.0  # Initial time
+tf = 5.0  # Final time
+h = 0.00001  # Step size
+S0 = np.array([x0, v0])  # Initial state vector [position, velocity]
 
 # Solve the differential equation using RK4
 t_values, sol = explicit_RK4(f, t0, tf, S0, r, omega, h)
 
 # Function to update the position of the mirror
 def update_mirror(mirror, sol):
+    """
+    Updates the position of the mirror in the vpython simulation.
+
+    Parameters:
+        mirror (vpython.box): The mirror object in the vpython scene.
+        sol (array): Solution array containing the position and velocity.
+    """
     mirror.pos = vector(sol[:, 0][-1], 0, 0)
 
-# Create the mirror object
+# Create the mirror object (uncomment to use vpython visualization)
 # mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
 
-fps = int(1 / h)
+fps = int(1 / h)  # Frames per second based on the step size
 
-# Apply FFT
+# Apply FFT to analyze the frequency domain
 n = len(t_values)  # Number of samples
-fhat = np.fft.fft(sol[:, 0], n)  # Compute the FFT
+fhat = np.fft.fft(sol[:, 0], n)  # Compute the FFT of the position data
 psd = fhat * np.conj(fhat) / n  # Power spectral density
 freq = (1 / (0.00001 * n)) * np.arange(n)  # Frequency array
-L = np.arange(1, np.floor(n / 2), dtype = 'int')  # Only use the first half of the FFT output
+L = np.arange(1, np.floor(n / 2), dtype='int')  # Only use the first half of the FFT output
 
 # Find the peak in the frequency domain
 peak_idx = np.argmax(psd[L])  # Index of the peak
@@ -100,9 +102,9 @@ peak_freq = freq[L][peak_idx]  # Frequency of the peak
 peak_power = psd[L][peak_idx]  # Power at the peak
 print("Peak frequency:", peak_freq)
 
-# Plot the solution
-plt.plot(t_values[:10 * fps], sol[:10 * fps, 0], label = 'Position')
-plt.plot(t_values[:10 * fps], sol[:10 * fps, 1], label = 'Velocity')
+# Plot the solution (Position and Velocity against Time)
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 0], label='Position')
+plt.plot(t_values[:10 * fps], sol[:10 * fps, 1], label='Velocity')
 plt.xlabel('Time')
 plt.ylabel('Position')
 plt.title('Position and Velocity against Time')
@@ -110,7 +112,7 @@ plt.legend()
 plt.grid(True)
 plt.savefig('moving_mirror_rk4.png')  # Save the plot to an image file
 
-# Animate the motion of the mirror
+# Animate the motion of the mirror (uncomment to use vpython visualization)
 # for i in range(len(t_values)):
     # scene.autoscale = False
     # rate(fps)  # Limit the frame rate to 100 frames per second

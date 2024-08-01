@@ -1,18 +1,36 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May 15 10:51:45 2024
+
+@author: nathanngo
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from vpython import *
 
-scene = canvas(width = 1500, height = 400, background = color.white)
+# Set up the visual environment
+scene = canvas(width=1500, height=400, background=color.white)
 
 def F(t):
+    """
+    Computes the external driving force at time t.
+
+    Parameters:
+        t (float): The current time.
+
+    Returns:
+        float: The computed driving force.
+    """
     return F0 * np.cos(omega_f * t) 
 
 def f(t, S):
     """
-    Defines the function representing the system of differential equations.
+    Defines the system of differential equations for the driven harmonic oscillator.
 
     Parameters:
-        t (float): Time variable.
+        t (float): The current time.
         S (numpy.ndarray): State vector [position, velocity].
 
     Returns:
@@ -25,18 +43,18 @@ def f(t, S):
 
 def RK45(f, t0, tf, S0, h):
     """
-    Implements the Runge-Kutta-Fehlberg method (RK45) for solving ordinary differential equations.
+    Implements the Runge-Kutta-Fehlberg (RK45) method to solve a system of differential equations.
 
     Parameters:
-        f (function): Function defining the system of differential equations.
+        f (function): The function representing the system of differential equations.
         t0 (float): Initial time.
         tf (float): Final time.
         S0 (numpy.ndarray): Initial state vector [position, velocity].
-        h (float): Step size.
+        h (float): Initial step size.
 
     Returns:
         numpy.ndarray: Array of time values.
-        numpy.ndarray: Array of state vectors.
+        numpy.ndarray: Array of state vectors [position, velocity] over time.
     """
     t_values = np.array([t0])
     x_values = np.array([[S0[0], S0[1]]])
@@ -44,7 +62,7 @@ def RK45(f, t0, tf, S0, h):
     n = 0
 
     while t < tf:
-        n = n + 1
+        n += 1
         x = x_values[-1, :]
         k1 = h * f(t, x)
         k2 = h * f(t + (1 / 4) * h, x + (1 / 4) * k1)
@@ -58,6 +76,7 @@ def RK45(f, t0, tf, S0, h):
         s = 0.84 * (error_m / error) ** (1 / 4)
         print("Out loop", n, "h:", h)
 
+        # Adjust step size if error is too large
         while (error > error_m):
             h = s * h
             k1 = h * f(t, x)
@@ -72,21 +91,22 @@ def RK45(f, t0, tf, S0, h):
             s = 0.84 * (error_m / error) ** (1 / 4)
             print("In loop, h:", h)
 
-        x_values = np.concatenate((x_values, [x_new]), axis = 0)
+        x_values = np.concatenate((x_values, [x_new]), axis=0)
         t_values = np.append(t_values, t + h)
         t = t + h
     return t_values, x_values
 
 def update_mirror(mirror, sol):
     """
-    Updates the position of the mirror.
+    Updates the position of the mirror in the visualization.
 
     Parameters:
-        mirror (vpython.box): The mirror object.
-        sol (numpy.ndarray): Solution array containing position and velocity.
+        mirror (vpython.box): The mirror object in the simulation.
+        sol (numpy.ndarray): Array containing the solution with position and velocity.
     """
     mirror.pos = vector(sol[:, 0][-1], 0, 0)
 
+# Input parameters from the user
 global r, omega, error_m, omega_f, F0
 
 m = float(input("Mass of the mirror:"))
@@ -102,14 +122,17 @@ h = 0.1
 S0 = np.array([x0, v0])
 error_m = 1e-7
 F0 = 0
-omega_f = sqrt(6) #The resonance frequency is sqrt(k / m)
+omega_f = sqrt(6)  # The resonance frequency is sqrt(k / m)
 
-mirror = box(pos = vector(S0[0], 0, 0), size = vector(0.01, 0.5, 0.3), color = color.blue)
+# Create the mirror object in the simulation
+mirror = box(pos=vector(S0[0], 0, 0), size=vector(0.01, 0.5, 0.3), color=color.blue)
 
+# Solve the differential equation using RK45
 t_values, x_values = RK45(f, t0, tf, S0, h)
 
-plt.plot(t_values, x_values[:, 0], label = 'Position')
-plt.plot(t_values, x_values[:, 1], label = 'Velocity')
+# Plot position and velocity over time
+plt.plot(t_values, x_values[:, 0], label='Position')
+plt.plot(t_values, x_values[:, 1], label='Velocity')
 plt.xlabel('Time')
 plt.ylabel('Position')
 plt.title('Position and Velocity against Time')
@@ -117,6 +140,7 @@ plt.legend()
 plt.grid(True)
 plt.savefig('moving_mirror_with_force_rk45.png')
 
+# Animation loop to update the mirror's position
 while True:
     for i in range(len(t_values)):
         if (i > 1):
