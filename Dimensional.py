@@ -134,7 +134,7 @@ global r, omega, error_m, omega_f, F0, h_interpolate, noisiness, noisiness_f
 
 # System parameters
 m = 0.1
-k = 60.0
+k = 180.0
 gamma = 0.5
 
 r = gamma / (2 * m)
@@ -144,16 +144,16 @@ omega = (k / m) ** 0.5
 x0 = 0.0
 v0 = 3.0
 t0 = 0.0
-tf = 100.0
+tf = 150.0
 h = 0.1
-h_interpolate = 0.01
+h_interpolate = 0.0001
 S0 = np.array([x0, v0])
 error_m = 1e-6
-F0 = 1
+F0 = 0.01
 noisiness = 0
 noisiness_f = 0
-linewidth = 1.4079999999992197
-omega_f = omega + 2 * np.pi * 0.0 * linewidth
+linewidth = 0.797999999999913
+omega_f = omega + 2 * np.pi * 2.0 * linewidth
 
 # Run the RK45 solver without noise in the force
 t_values_temp, x_values_temp, noise_iso = RK45(f, t0, tf, S0, h)
@@ -161,13 +161,13 @@ t_values_temp, x_values_temp, noise_iso = RK45(f, t0, tf, S0, h)
 # Interpolation for smooth plotting
 t_values_spline = np.arange(t0, tf, h_interpolate)
 interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
-x_values_spline = interpolator(t_values_spline)
+x_values_spline_noiseless = interpolator(t_values_spline)
 interpolator = interp1d(t_values_temp, x_values_temp[:, 1], kind='cubic')
-v_values_spline = interpolator(t_values_spline)
+v_values_spline_noiseless = interpolator(t_values_spline)
 
 # Perform Fourier Transform on the interpolated position values
-freqs_noiseless = np.fft.fftshift(np.fft.fftfreq(len(t_values_spline), d=h_interpolate))
-X = np.fft.fftshift(np.fft.fft(x_values_spline)) * h_interpolate
+freqs_noiseless = np.fft.fftshift(np.fft.fftfreq(len(t_values_spline[100000:]), d=h_interpolate))
+X = np.fft.fftshift(np.fft.fft(x_values_spline_noiseless[100000:])) * h_interpolate
 X_noiseless = np.abs(X)
 
 noisiness_f = 0.5  # Increase noise level for the force
@@ -178,19 +178,29 @@ t_values_temp, x_values_temp, noise_iso = RK45(f, t0, tf, S0, h)
 # Interpolation for smooth plotting
 t_values_spline = np.arange(t0, tf, h_interpolate)
 interpolator = interp1d(t_values_temp, x_values_temp[:, 0], kind='cubic')
-x_values_spline = interpolator(t_values_spline)
+x_values_spline_noisy = interpolator(t_values_spline)
 interpolator = interp1d(t_values_temp, x_values_temp[:, 1], kind='cubic')
-v_values_spline = interpolator(t_values_spline)
+v_values_spline_noisy = interpolator(t_values_spline)
 
 # Perform Fourier Transform on the interpolated position values with noise
-freqs_noisy = np.fft.fftshift(np.fft.fftfreq(len(t_values_spline), d=h_interpolate))
-X = np.fft.fftshift(np.fft.fft(x_values_spline)) * h_interpolate
+freqs_noisy = np.fft.fftshift(np.fft.fftfreq(len(t_values_spline[100000:]), d=h_interpolate))
+X = np.fft.fftshift(np.fft.fft(x_values_spline_noisy[100000:])) * h_interpolate
 X_noisy = np.abs(X)
+
+plt.plot(t_values_spline[100000:], x_values_spline_noiseless[100000:], label='Noiseless')
+# plt.plot(t_values_spline, x_values_spline_noisy, label='Noisy')
+plt.xlabel(r't', usetex=True)
+plt.ylabel(r'x', usetex=True)
+plt.title(r'Position-time; Underdamped; Detuned to 0.25 Linewidth', usetex=True)
+plt.grid(True)
+plt.legend()
+plt.savefig('Figure.pdf')
+plt.show()
 # %%
 
-plt.plot(freqs_noisy[4500:-4500], X_noisy[4500:-4500], label='Noisy')
-plt.plot(freqs_noiseless[4500:-4500], X_noiseless[4500:-4500], label='Noiseless')
-plt.xlabel(r'Frequency', usetex=True)
+plt.plot(freqs_noisy, X_noisy, label='Noisy')
+plt.plot(freqs_noiseless, X_noiseless, label='Noiseless')
+plt.xlabel(r'Frequency(Hz)', usetex=True)
 plt.ylabel(r'Amplitude', usetex=True)
 plt.title(r'Fourier Transform; Underdamped; Detuned to 0 Linewidth', usetex=True)
 plt.grid(True)
@@ -198,29 +208,125 @@ plt.legend()
 plt.savefig('Figure.pdf')
 plt.show()
 
-plt.plot(t_values_spline, x_values_spline)
-plt.show()
+# # %%
+# freqs_new = freqs_noiseless[750000:-740000]
+# abs_new = np.abs(X_noiseless)[750000:-740000]
+# freqs_spline = np.arange(np.min(freqs_new), np.max(freqs_new), 0.001)
 
+# # Interpolate and plot the smoothed Fourier Transform result
+# interpolator = interp1d(freqs_new, abs_new, kind='cubic')
+# abs_spline = interpolator(freqs_spline)
+
+# plt.plot(freqs_spline, abs_spline)
+# plt.show()
+
+# # Determine the range of frequencies where the amplitude is above half the maximum value
+# abs_max = np.max(abs_spline)
+# freqs_above = np.empty(0, dtype=float)
+
+# for i in range(len(freqs_spline)):
+#     if (abs_spline[i] >= abs_max / np.sqrt(2)):
+#         print(freqs_spline[i])
+#         freqs_above = np.append(freqs_above, freqs_spline[i])
+
+# linewidth = freqs_above[-1] - freqs_above[0]
+# print('Linewidth:', linewidth)
 # %%
-freqs_new = freqs_noiseless[4000:-5000]
-abs_new = np.abs(X_noiseless)[4000:-5000]
-freqs_spline = np.arange(np.min(freqs_new), np.max(freqs_new), 0.001)
-
-# Interpolate and plot the smoothed Fourier Transform result
-interpolator = interp1d(freqs_new, abs_new, kind='cubic')
-abs_spline = interpolator(freqs_spline)
-
-plt.plot(freqs_spline, abs_spline)
+plt.plot(x_values_spline_noiseless, m * v_values_spline_noiseless)
 plt.show()
 
-# Determine the range of frequencies where the amplitude is above half the maximum value
-abs_max = np.max(abs_spline)
-freqs_above = np.empty(0, dtype=float)
+r_values_spline = np.sqrt(x_values_spline_noiseless ** 2 + m * v_values_spline_noiseless ** 2)
+r_max = np.max(r_values_spline)
+r_relax = r_max / np.e
 
-for i in range(len(freqs_spline)):
-    if (abs_spline[i] >= 0.5 * abs_max):
-        print(freqs_spline[i])
-        freqs_above = np.append(freqs_above, freqs_spline[i])
+plt.plot(t_values_spline[:3000], r_values_spline[:3000])
+plt.show()
 
-linewidth = freqs_above[-1] - freqs_above[0]
-print('Linewidth:', linewidth)
+plt.plot(t_values_spline[:15000], x_values_spline_noisy[:15000], label='Noisy')
+plt.plot(t_values_spline[:15000], x_values_spline_noiseless[:15000], label='Noiseless')
+plt.xlabel(r'Time(s)', usetex=True)
+plt.ylabel(r'Position(m)', usetex=True)
+plt.title(r'Position-time; Underdamped; Detuned to 0.25 Linewidth', usetex=True)
+plt.grid(True)
+plt.legend()
+plt.savefig('Figure.pdf')
+plt.show()
+
+# Find the time corresponding to the relaxation time T1
+differences = np.abs(r_values_spline - r_relax)
+index = np.argmin(differences)
+
+print('T1:', t_values_spline[index])
+# %%
+
+from scipy.optimize import curve_fit
+
+def envelope_func(t, A, gamma):
+    return A * np.exp(-gamma * t)
+
+# Take the absolute value of the position to fit the envelope
+abs_position = np.abs(x_values_spline_noiseless)
+
+# Initial guess for the parameters [Amplitude, gamma]
+initial_guess = [np.max(abs_position), 1.0]
+
+# Fit the envelope function to the data
+popt, pcov = curve_fit(envelope_func, t_values_spline, abs_position, p0=initial_guess)
+
+# Extract the fitted parameters
+A_fitted, gamma_fitted = popt
+
+# Calculate the relaxation time T1
+T1 = 1 / gamma_fitted
+
+# Print the relaxation time
+print(f"Relaxation time T1: {T1:.4f} seconds")
+
+# Plot the results
+plt.figure()
+plt.plot(t_values_spline, abs_position, 'b-', label='Absolute Position Data')
+plt.plot(t_values_spline, envelope_func(t_values_spline, *popt), 'r--', label='Fitted Exponential Envelope')
+plt.xlabel('Time (s)')
+plt.ylabel('Position (m)')
+plt.title('Position Time Series with Fitted Exponential Envelope')
+plt.legend()
+plt.show()
+# %%
+
+# Take the absolute value of the position to fit the envelope
+abs_position = np.abs(x_values_spline_noisy)
+
+# Initial guess for the parameters [Amplitude, gamma]
+initial_guess = [np.max(abs_position), 1.0]
+
+# Fit the envelope function to the data
+popt, pcov = curve_fit(envelope_func, t_values_spline, abs_position, p0=initial_guess)
+
+# Extract the fitted parameters
+A_fitted, gamma_fitted = popt
+
+# Calculate the relaxation time T1
+T1 = 1 / gamma_fitted
+
+# Print the relaxation time
+print(f"Relaxation time T1: {T1:.4f} seconds")
+
+# Plot the results
+plt.figure()
+plt.plot(t_values_spline, abs_position, 'b-', label='Absolute Position Data')
+plt.plot(t_values_spline, envelope_func(t_values_spline, *popt), 'r--', label='Fitted Exponential Envelope')
+plt.xlabel('Time (s)')
+plt.ylabel('Position (m)')
+plt.title('Position Time Series with Fitted Exponential Envelope')
+plt.legend()
+plt.show()
+# %%
+
+# Find the index of the peak frequency
+peak_index = np.argmax(X_noiseless)
+
+# Get the peak frequency
+peak_frequency = freqs_noiseless[peak_index]
+
+# Print the peak frequency
+print(f"Peak Frequency: {peak_frequency:.4f} Hz")
